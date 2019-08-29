@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: haproxy-config
+    namespace: haproxy
+data:
+    haproxy.cfg: |
+      global
+        #Set maximum number of file descriptors
+        ulimit-n 65536
+        
+        #Set syslog
+        log 127.0.0.1	local0
+        log 127.0.0.1	local1 notice
+        
+        # Set maximum number of concurrent connections
+        maxconn 20000
+
+      defaults
+        #Set the maximum time to wait for a connection attempt to a server to succeed.
+        timeout connect 5000ms
+        
+        #Set the maximum inactivity time on the client side.
+        timeout client 50000ms
+        
+        #Set the maximum inactivity time on the server side.
+        timeout server 50000ms
+        
+        # never fail on address resolution
+        default-server init-addr last,libc,none
+
+      listen mqtt
+        #Set the protocol to TCP
+        mode tcp
+
+        #Enable logging of TCP requests   
+        option tcplog
+
+        #Define listening addresses and ports
+        bind *:1883
+        
+        #Set balancer to least connection mode
+        balance leastconn
+
+        #Server farm
+        # Check 3 times before disable server
+        # Check 5 times beforen enable server
+        # Check every 1000 ms
+        server iotagent1 10.50.11.54:30002 check inter 1000ms fall 3 rise 5
+        server iotagent2 10.50.11.42:30002 check inter 1000ms fall 3 rise 5

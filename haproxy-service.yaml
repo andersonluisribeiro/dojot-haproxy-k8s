@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: haproxy-service
+  namespace: haproxy
+spec:
+  selector:
+    app: haproxy
+  ports:
+    - name: mqtt
+      protocol: TCP
+      port: 1883
+      nodePort: 30002
+  type: NodePort
